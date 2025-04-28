@@ -6,17 +6,60 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-const verificarLetraNaPalavra = require("./verificar-letra-na-palavra");
-const substituirLetraNaPosicacao = require("./substituir-letra-na -posicao");
-const exibirPosicoes = require("./exibir-posicoes");
-const obterPalavraAleatoria = require("./palavra-aleatoria");
-
 function perguntarUsuario(pergunta) {
   return new Promise((resolve) => {
     rl.question(pergunta, (resposta) => {
       resolve(resposta);
     });
   });
+}
+
+function exibirPosicoes(palavraJogo) {
+  let posicoes = "";
+
+  const palavraArray = palavraJogo.split("");
+  palavraArray.forEach(() => {
+    posicoes = `${posicoes}_ `;
+  });
+
+  posicoes = `Adivinhe a palavra: ${posicoes} (${palavraJogo.length} letras)`;
+
+  console.log(posicoes);
+}
+
+function palavraAleatoria(lista) {
+  const indiceAleatorio = Math.floor(Math.random() * lista.length);
+  return lista[indiceAleatorio];
+}
+
+function substituirLetraNaPosicacao(resultado, palavra, letra) {
+  let posicoesLetra = [];
+  let index = palavra.indexOf(letra);
+
+  while (index != -1) {
+    posicoesLetra.push(index);
+
+    index = palavra.indexOf(letra, index + 1);
+  }
+
+  const resultadoArr = resultado.split("");
+
+  posicoesLetra.forEach((elemento) => {
+    resultadoArr[elemento] = `${letra}`;
+  });
+
+  const resultadoFinal = resultadoArr.join("");
+  return resultadoFinal;
+}
+
+function verificarLetraNaPalavra(palavra, letra) {
+  const letraEncontrada = palavra
+    .split("")
+    .find((elemento) => elemento == letra);
+  if (letraEncontrada == null) {
+    return false;
+  }
+  return true;
 }
 
 async function main() {
