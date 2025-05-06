@@ -6,6 +6,13 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
+const verificarLetraNaPalavra = require("./verificar-letra-na-palavra");
+const substituirLetraNaPosicacao = require("./substituir-letra-na -posicao");
+const exibirPosicoes = require("./exibir-posicoes");
+const obterPalavraAleatoria = require("./palavra-aleatoria");
+const jogarNovamente = require("./jogar-novamente");
+const reiniciarJogo = require("./reiniciar-jogo");
+
 function perguntarUsuario(pergunta) {
   return new Promise((resolve) => {
     rl.question(pergunta, (resposta) => {
@@ -14,57 +21,9 @@ function perguntarUsuario(pergunta) {
   });
 }
 
-function exibirPosicoes(palavraJogo) {
-  let posicoes = "";
-
-  const palavraArray = palavraJogo.split("");
-  palavraArray.forEach(() => {
-    posicoes = `${posicoes}_ `;
-  });
-
-  posicoes = `Adivinhe a palavra: ${posicoes} (${palavraJogo.length} letras)`;
-
-  console.log(posicoes);
-}
-
-function palavraAleatoria(lista) {
-  const indiceAleatorio = Math.floor(Math.random() * lista.length);
-  return lista[indiceAleatorio];
-}
-
-function substituirLetraNaPosicacao(resultado, palavra, letra) {
-  let posicoesLetra = [];
-  let index = palavra.indexOf(letra);
-
-  while (index != -1) {
-    posicoesLetra.push(index);
-
-    index = palavra.indexOf(letra, index + 1);
-  }
-
-  const resultadoArr = resultado.split("");
-
-  posicoesLetra.forEach((elemento) => {
-    resultadoArr[elemento] = `${letra}`;
-  });
-
-  const resultadoFinal = resultadoArr.join("");
-  return resultadoFinal;
-}
-
-function verificarLetraNaPalavra(palavra, letra) {
-  const letraEncontrada = palavra
-    .split("")
-    .find((elemento) => elemento == letra);
-  if (letraEncontrada == null) {
-    return false;
-  }
-  return true;
-}
-
 async function main() {
   console.log("Bem vindo ao Jogo da Forca\n");
-  const acao = await perguntarUsuario("1. Jogar\n2. Encerrar\n");
+  const acao = await perguntarUsuario("\n1. Jogar\n2. Encerrar\n");
 
   if (acao === "2") {
     console.log("Obrigado por Jogar!!!");
@@ -93,6 +52,8 @@ async function main() {
   exibirPosicoes(palavraJogo);
 
   let tentativas = palavraJogo.length;
+
+  let letraErrada = [];
   while (tentativas > 0) {
     const letraEscolhida = await perguntarUsuario("Escolha um letra:");
 
@@ -108,20 +69,33 @@ async function main() {
         letraEscolhida
       );
       console.log(resultado);
-      if (resultado == palavraJogo) {
-        console.log("Parabéns!!!. Você adivinhou a palavra");
-        rl.close();
-        return;
-      }
-    } else {
+    }
+
+    if (letraErrada.find((elemento) => elemento == letraEscolhida)) {
+      console.log("Você já ultilizou está letra!!!\nTente novamente\n");
+      console.log(`Letras erradas: ${letraErrada}`);
+
+      continue;
+    }
+    if (!letraContidaNaPalavra) {
+      letraErrada.push(letraEscolhida);
       tentativas -= 1;
+
+      console.log(letraErrada);
       console.log("Errou!!! Tente novamente");
       console.log(`Suas tentativas: ${tentativas}`);
+    }
+    while (resultado == palavraJogo) {
+      console.log("Parabéns!!! Você adivinhou a palavra");
+      const acao2 = await perguntarUsuario("1. Menu\n2. Encerrar\n");
+
+      await reiniciarJogo(jogarNovamente, acao2, main(), rl);
     }
   }
 
   console.log("GAME OVER");
-  rl.close();
+  const acao2 = await perguntarUsuario("1. Menu\n2. Encerrar\n");
+  await reiniciarJogo(jogarNovamente, acao2, main(), rl);
 }
 
 main();
